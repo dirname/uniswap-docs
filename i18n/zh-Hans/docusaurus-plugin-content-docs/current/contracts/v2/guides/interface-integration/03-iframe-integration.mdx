@@ -1,0 +1,69 @@
+---
+id: iframe-integration
+title: Iframe 集成
+---
+
+:::note 交换小部件
+这些文档已过时。请参考 [交换小部件](../../../swap-widget/guides/getting-started) ，以在您的网站上将 Uniswap 交换小部件作为 React 组件嵌入，只需 2 分钟。
+:::
+
+Uniswap 可以在其他站点中作为 iframe 使用。iframe 显示 Uniswap 前端站点的确切版本，并可以具有自定义预填充设置。
+
+# 为何你可能需要这个
+
+直接在你的 Web 应用程序中集成 Uniswap 站点可用于多种原因。
+
+该界面允许用户购买、出售、发送或为 ERC20 代币提供流动性。如果你的应用程序围绕这些 ERC20 代币提供服务，iframe 集成可能会有用。（例如，用户可以通过你网站上的 Uniswap iframe 购买 DAI，然后允许用户在你的网站上借出该 DAI）。
+
+如果应用程序要求用户获取某种代币以便使用某些服务，这也可能很有用（例如，允许用户购买“REP”代币，以便他们可以在 Augur Dapp 上参与预测市场）。
+
+# iframe 与自定义 UI
+
+iframe 集成的一个好处是，你的站点会自动跟上任何对站点的改进/添加。初始集成设置后，无需进一步工作即可随时间拉取更新，因为交易所站点会随着时间的推移进行更新。
+
+# 示例
+
+```text
+<iframe
+  src="https://app.uniswap.org/#/swap?exactField=input&exactAmount=10&inputCurrency=0x6b175474e89094c44da98b954eedeac495271d0f"
+  height="660px"
+  width="100%"
+  style="
+    border: 0;
+    margin: 0 auto;
+    margin-bottom: .5rem;
+    display: block;
+    border-radius: 10px;
+    max-width: 960px;
+    min-width: 300px;
+  "
+/>
+```
+
+iframe 集成的一个示例可以在 FOAM 站点找到：[https://map.foam.space/](https://map.foam.space/#/at/?lng=-74.0045300&lat=40.6771800&zoom=5.00)
+
+要查看 iframe，请点击右上角的下拉菜单，然后点击 `获取 FOAM`。
+
+# 添加到你的站点
+
+要在你的站点内包含 Uniswap iframe，只需在你的网站代码中添加一个 iframe 元素并链接到 Uniswap 前端。
+
+链接到 ETH &lt;-&gt; DAI 交换页面看起来像这样。要链接到你选择的代币，只需将 `outputCurrency` 后的地址替换为你想要链接的代币的代币地址即可。
+
+```text
+<iframe
+  src="https://app.uniswap.org/#/swap?outputCurrency=0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359"
+  height="660px"
+  width="100%"
+  style="
+    border: 0;
+    margin: 0 auto;
+    display: block;
+    border-radius: 10px;
+    max-width: 600px;
+    min-width: 300px;
+  "
+/>
+```
+
+你可以使用 URL 查询参数来自定义所选页面、所选自定义代币等。请参阅 [自定义链接](custom-interface-linking)。

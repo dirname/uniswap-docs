@@ -1,0 +1,222 @@
+{
+  "version.label": {
+    "message": "下一步",
+    "description": "当前版本的标签"
+  },
+  "sidebar.apiSidebar.category.Subgraph": {
+    "message": "子图",
+    "description": "sidebar apiSidebar 中子图类别的标签"
+  },
+  "sidebar.apiSidebar.category.Guides": {
+    "message": "指南",
+    "description": "sidebar apiSidebar 中指南类别的标签"
+  },
+  "sidebar.conceptsSidebar.category.Protocol Concepts": {
+    "message": "协议概念",
+    "description": "sidebar conceptsSidebar 中协议概念类别的标签"
+  },
+  "sidebar.conceptsSidebar.category.Governance": {
+    "message": "治理",
+    "description": "sidebar conceptsSidebar 中治理类别的标签"
+  },
+  "sidebar.contractsSidebar.category.V4 Protocol": {
+    "message": "V4 协议",
+    "description": "sidebar contractsSidebar 中 V4 协议类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Concepts": {
+    "message": "概念",
+    "description": "sidebar contractsSidebar 中概念类别的标签"
+  },
+  "sidebar.contractsSidebar.category.My First Hook": {
+    "message": "我的第一个 Hook",
+    "description": "sidebar contractsSidebar 中我的第一个 Hook 类别的标签"
+  },
+  "sidebar.contractsSidebar.category.V3 Protocol": {
+    "message": "V3 协议",
+    "description": "sidebar contractsSidebar 中 V3 协议类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Guides": {
+    "message": "指南",
+    "description": "sidebar contractsSidebar 中指南类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Implement A Swap": {
+    "message": "实现交换",
+    "description": "sidebar contractsSidebar 中实现交换类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Providing Liquidity": {
+    "message": "提供流动性",
+    "description": "sidebar contractsSidebar 中提供流动性类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Liquidity Mining": {
+    "message": "流动性挖矿",
+    "description": "sidebar contractsSidebar 中流动性挖矿类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Implement Flash Swaps": {
+    "message": "实现闪电交换",
+    "description": "sidebar contractsSidebar 中实现闪电交换类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Governance Proposals": {
+    "message": "治理提案",
+    "description": "sidebar contractsSidebar 中治理提案类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Technical Reference": {
+    "message": "技术参考",
+    "description": "sidebar contractsSidebar 中技术参考类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Core": {
+    "message": "核心",
+    "description": "sidebar contractsSidebar 中核心类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Interfaces": {
+    "message": "接口",
+    "description": "sidebar contractsSidebar 中接口类别的标签"
+  },
+  "sidebar.contractsSidebar.category.callback": {
+    "message": "回调",
+    "description": "sidebar contractsSidebar 中回调类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Pool": {
+    "message": "池",
+    "description": "sidebar contractsSidebar 中池类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Libraries": {
+    "message": "库",
+    "description": "sidebar contractsSidebar 中库类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Governance": {
+    "message": "治理",
+    "description": "sidebar contractsSidebar 中治理类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Periphery": {
+    "message": "外围",
+    "description": "sidebar contractsSidebar 中外围类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Base": {
+    "message": "基础",
+    "description": "sidebar contractsSidebar 中基础类别的标签"
+  },
+  "sidebar.contractsSidebar.category.external": {
+    "message": "外部",
+    "description": "sidebar contractsSidebar 中外部类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Lens": {
+    "message": "镜头",
+    "description": "sidebar contractsSidebar 中镜头类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Staker": {
+    "message": "质押者",
+    "description": "sidebar contractsSidebar 中质押者类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Test": {
+    "message": "测试",
+    "description": "sidebar contractsSidebar 中测试类别的标签"
+  },
+  "sidebar.contractsSidebar.category.deployments": {
+    "message": "部署",
+    "description": "sidebar contractsSidebar 中部署类别的标签"
+  },
+  "sidebar.contractsSidebar.category.UniswapX": {
+    "message": "UniswapX",
+    "description": "sidebar contractsSidebar 中 UniswapX 类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Universal Router": {
+    "message": "通用路由器",
+    "description": "sidebar contractsSidebar 中通用路由器类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Permit2": {
+    "message": "Permit2",
+    "description": "sidebar contractsSidebar 中 Permit2 类别的标签"
+  },
+  "sidebar.contractsSidebar.category.V2 Protocol": {
+    "message": "V2 协议",
+    "description": "sidebar contractsSidebar 中 V2 协议类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Protocol Overview": {
+    "message": "协议概览",
+    "description": "sidebar contractsSidebar 中协议概览类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Core Concepts": {
+    "message": "核心概念",
+    "description": "sidebar contractsSidebar 中核心概念类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Advanced Topics": {
+    "message": "高级主题",
+    "description": "sidebar contractsSidebar 中高级主题类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Interface Integration": {
+    "message": "接口集成",
+    "description": "sidebar contractsSidebar 中接口集成类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Smart Contract Integration": {
+    "message": "智能合约集成",
+    "description": "sidebar contractsSidebar 中智能合约集成类别的标签"
+  },
+  "sidebar.contractsSidebar.category.API": {
+    "message": "API",
+    "description": "sidebar contractsSidebar 中 API 类别的标签"
+  },
+  "sidebar.contractsSidebar.category.Smart Contracts": {
+    "message": "智能合约",
+    "description": "sidebar contractsSidebar 中智能合约类别的标签"
+  },
+  "sidebar.contractsSidebar.category.V1 Protocol": {
+    "message": "V1 协议",
+    "description": "sidebar contractsSidebar 中 V1 协议类别的标签"
+  },
+  "sidebar.sdkSidebar.category.V3 SDK": {
+    "message": "V3 SDK",
+    "description": "sidebar sdkSidebar 中 V3 SDK 类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Guides": {
+    "message": "指南",
+    "description": "sidebar sdkSidebar 中指南类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Swaps": {
+    "message": "交换",
+    "description": "sidebar sdkSidebar 中交换类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Pooling Liquidity": {
+    "message": "流动性池",
+    "description": "sidebar sdkSidebar 中流动性池类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Advanced": {
+    "message": "高级",
+    "description": "sidebar sdkSidebar 中高级类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Technical Reference": {
+    "message": "技术参考",
+    "description": "sidebar sdkSidebar 中技术参考类别的标签"
+  },
+  "sidebar.sdkSidebar.category.classes": {
+    "message": "类",
+    "description": "sidebar sdkSidebar 中类类别的标签"
+  },
+  "sidebar.sdkSidebar.category.enums": {
+    "message": "枚举",
+    "description": "sidebar sdkSidebar 中枚举类别的标签"
+  },
+  "sidebar.sdkSidebar.category.interfaces": {
+    "message": "接口",
+    "description": "sidebar sdkSidebar 中接口类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Swap Widget": {
+    "message": "交换小组件",
+    "description": "sidebar sdkSidebar 中交换小组件类别的标签"
+  },
+  "sidebar.sdkSidebar.category.web3-react": {
+    "message": "web3-react",
+    "description": "sidebar sdkSidebar 中 web3-react 类别的标签"
+  },
+  "sidebar.sdkSidebar.category.Core SDK": {
+    "message": "核心 SDK",
+    "description": "sidebar sdkSidebar 中核心 SDK 类别的标签"
+  },
+  "sidebar.sdkSidebar.category.V2 SDK": {
+    "message": "V2 SDK",
+    "description": "sidebar sdkSidebar 中 V2 SDK 类别的标签"
+  },
+  "sidebar.sdkSidebar.category.V1 SDK": {
+    "message": "V1 SDK",
+    "description": "sidebar sdkSidebar 中 V1 SDK 类别的标签"
+  }
+}

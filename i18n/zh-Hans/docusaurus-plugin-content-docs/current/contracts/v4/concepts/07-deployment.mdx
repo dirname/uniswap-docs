@@ -1,0 +1,178 @@
+---
+id: hook-deployment
+title: 钩子部署
+sidebar_position: 6
+---
+
+# 钩子部署
+
+每个钩子都与特定的标志关联，这个标志在合约中表现为一个常量。这些常量是地址中的位位置。例如，`BEFORE_INITIALIZE_FLAG` 由位移操作 `1 << 159` 表示，这意味着它对应于地址中的第160位。当部署钩子合约时，会检查其地址的前导位来确定哪些钩子被启用。
+
+初始化期间，PoolManager 会调用 Hooks 库来验证钩子是否在正确的地址上部署。
+
+例如，部署在地址 `0x9000000000000000000000000000000000000000` 的钩子合约具有前导位 '1001'。这种配置激活了与这些位对应的钩子，如 '初始化前' 和 '添加流动性后' 钩子。这种方法提供了一种紧凑且高效的方式来直接将权限编码到合约的地址中。
+
+此编码表明将触发两个特定的钩子（'初始化前' 和 '添加流动性后'）。在提供的地址中：
+- 第二高位上的 `1` 对齐了 `BEFORE_INITIALIZE_FLAG`（位159），以及
+- 序列 `1001` 中的尾部 `1` 对齐了 `AFTER_ADD_LIQUIDITY_FLAG`（位156）。
+
+序列中的另外两个 `0` 表明 `AFTER_INITIALIZE_FLAG` 和 `BEFORE_ADD_LIQUIDITY_FLAG` 没有设置。
+
+
+| 十六进制钩子地址                            | 二进制地址      | 描述               |
+|---------------------------------------------|---------------------|---------------------------|
+| `0x8000000000000000000000000000000000000000` | `1000 0000...`（位159）| BEFORE_INITIALIZE_FLAG     |
+| `0x4000000000000000000000000000000000000000` | `0100 0000...`（位158）| AFTER_INITIALIZE_FLAG      |
+| `0x2000000000000000000000000000000000000000` | `0010 0000...`（位157）| BEFORE_ADD_LIQUIDITY_FLAG  |
+| `0x1000000000000000000000000000000000000000` | `0001 0000...`（位156）| AFTER_ADD_LIQUIDITY_FLAG   |
+| `0x0800000000000000000000000000000000000000` | `0000 1000...`（位155）| BEFORE_REMOVE_LIQUIDITY_FLAG|
+| `0x0400000000000000000000000000000000000000` | `0000 0100...`（位154）| AFTER_REMOVE_LIQUIDITY_FLAG |
+| `0x0200000000000000000000000000000000000000` | `0000 0010...`（位153）| BEFORE_SWAP_FLAG           |
+| `0x0100000000000000000000000000000000000000` | `0000 0001...`（位152）| AFTER_SWAP_FLAG            |
+| `0x0080000000000000000000000000000000000000` | `0000 0000 1000...`（位151）| BEFORE_DONATE_FLAG         |
+| `0x0040000000000000000000000000000000000000` | `0000 0000 0100...`（位150）| AFTER_DONATE_FLAG          |
+| `0x0020000000000000000000000000000000000000` | `0000 0000 0010...`（位149）| NO_OP_FLAG                 |
+| `0x0010000000000000000000000000000000000000` | `0000 0000 0001...`（位148）| ACCESS_LOCK_FLAG           |
+
+
+根据提供的代码生成有效的钩子地址，我们关注的是指示哪些钩子被调用的前导位。每个标志对应地址中特定的前导位，如提供的常量所示。
+
+这里有一些基于标志的示例地址：
+
+### 1. 单个钩子
+#### **示例 1：仅 BEFORE_SWAP_FLAG**
+- 地址：`0x2000000000000000000000000000000000000000`
+- 前导位：'0010...'
+- 解释：'交换前' 的标志通过在第153位（从右数）设置 '1' 来设定，以十六进制表示为 `0x2000000000000000000000000000000000000000`。
+
+#### **示例 2：仅 AFTER_DONATE_FLAG**
+- 地址：`0x4000000000000000000000000000000000000000`
+- 前导位：'0100...'
+- 解释：'捐赠后' 的标志通过在第150位设置 '1' 来设定，以 `0x4000000000000000000000000000000000000000` 表示。
+
+### 2. 两个钩子
+#### **示例 3：BEFORE_SWAP_FLAG 和 AFTER_SWAP_FLAG**
+- 地址：`0x3000000000000000000000000000000000000000`
+- 前导位：'0011...'
+- 解释：组合 '交换前' 和 '交换后' 的标志需要设置第153和152位，结果为 `0x3000000000000000000000000000000000000000`。
+
+#### **示例 4：BEFORE_INITIALIZE_FLAG 和 AFTER_INITIALIZE_FLAG**
+- 地址：`0xC000000000000000000000000000000000000000`
+- 前导位：'1100...'
+- 解释：'初始化前' 和 '初始化后' 的组合设置了第159和158位，表示为 `0xC000000000000000000000000000000000000000`。
+
+
+```solidity
+library Hooks {
+    // 这些标志使用按位左移定义。`1 << n` 操作意味着二进制数字 `1` 向左移动 `n` 位，实际上在第 `n` 位位置放置了一个 `1`（从右向左计数，从0开始）。这种技术通常用于编程中设置数字中的特定位，可以作为标志使用。在以太坊地址中，长度为160位，这些标志对应于前导位，因为位移的位置较高（例如，159、158）。
+
+    uint256 internal constant BEFORE_INITIALIZE_FLAG = 1 << 159; // （位159）
+    uint256 internal constant AFTER_INITIALIZE_FLAG = 1 << 158; // （位158）
+    uint256 internal constant BEFORE_ADD_LIQUIDITY_FLAG = 1 << 157; // （位157）
+    uint256 internal constant AFTER_ADD_LIQUIDITY_FLAG = 1 << 156; // （位156）
+    uint256 internal constant BEFORE_REMOVE_LIQUIDITY_FLAG = 1 << 155; // （位155）
+    uint256 internal constant AFTER_REMOVE_LIQUIDITY_FLAG = 1 << 154; // （位154）
+    uint256 internal constant BEFORE_SWAP_FLAG = 1 << 153; // （位153）
+    uint256 internal constant AFTER_SWAP_FLAG = 1 << 152; // （位152）
+    uint256 internal constant BEFORE_DONATE_FLAG = 1 << 151; // （位151）
+    uint256 internal constant AFTER_DONATE_FLAG = 1 << 150; // （位150）
+    uint256 internal constant NO_OP_FLAG = 1 << 149; // （位149）
+    uint256 internal constant ACCESS_LOCK_FLAG = 1 << 148; // （位148）
+
+    /// @notice 旨在在钩子构造函数中使用的实用程序函数，以确保
+    /// 部署的钩子地址导致调用预期的钩子
+    /// @param permissions 预期调用的钩子
+    /// @dev permissions 参数是内存，因为该函数将从构造函数中调用
+    function validateHookPermissions(IHooks self, Permissions memory permissions) internal pure {
+        if (
+            permissions.beforeInitialize != self.hasPermission(BEFORE_INITIALIZE_FLAG)
+                || permissions.afterInitialize != self.hasPermission(AFTER_INITIALIZE_FLAG)
+                || permissions.beforeAddLiquidity != self.hasPermission(BEFORE_ADD_LIQUIDITY_FLAG)
+                || permissions.afterAddLiquidity != self.hasPermission(AFTER_ADD_LIQUIDITY_FLAG)
+                || permissions.beforeRemoveLiquidity != self.hasPermission(BEFORE_REMOVE_LIQUIDITY_FLAG)
+                || permissions.afterRemoveLiquidity != self.hasPermission(AFTER_REMOVE_LIQUIDITY_FLAG)
+                || permissions.beforeSwap != self.hasPermission(BEFORE_SWAP_FLAG)
+                || permissions.afterSwap != self.hasPermission(AFTER_SWAP_FLAG)
+                || permissions.beforeDonate != self.hasPermission(BEFORE_DONATE_FLAG)
+                || permissions.afterDonate != self.hasPermission(AFTER_DONATE_FLAG)
+                || permissions.noOp != self.hasPermission(NO_OP_FLAG)
+                || permissions.accessLock != self.hasPermission(ACCESS_LOCK_FLAG)
+        ) {
+            revert HookAddressNotValid(address(self));
+        }
+    }
+
+   function hasPermission(IHooks self, uint256 flag) internal pure returns (bool) {
+        return uint256(uint160(address(self))) & flag != 0;
+    }
+}
+```
+
+
+
+# CREATE2
+以太坊区块链允许你创建合约。有两种创建
+这些合约的方式：
+
+1. **CREATE**：这是常规方式。每次使用此方法创建合约时，都会获得一个新的、唯一的
+地址（就像房子获得一个独特的邮政地址）。
+
+2. **CREATE2**：这是一种高级方式。在这里，你使用你的地址，一个 `盐` 即你自己选择的独特数字，以及
+称为 `字节码` 的合约代码来创建合约。`CREATE2` 的神奇之处在于，如果你使用相同的
+字段，你每次都会得到相同的合约地址。
+
+使用 `CREATE2` 可以确保钩子部署到精确的正确地址。
+
+以下是一段小代码，在实际部署之前预测使用 `CREATE2` 部署合约的地址。
+```solidity
+bytes32 salt = keccak256(abi.encodePacked(someData));
+address predictedAddress = address(uint(keccak256(abi.encodePacked(
+    byte(0xff),
+    deployerAddress,
+    salt,
+    keccak256(bytecode)
+))));
+```
+
+
+# 确定性部署代理
+许多开发人员使用 https://github.com/Arachnid/deterministic-deployment-proxy 来将合约部署到特定
+地址。该项目的主要功能是使用以太坊 CREATE2 操作码，这使得合约的确定性部署成为可能。部署代理还使不同网络间相同地址成为可能。
+
+大多数链上都有部署代理位于 `0x4e59b44847b379578588920cA78FbF26c0B4956C`。详情请见 [这里](https://github.com/Uniswap/v4-periphery/issues/59#issuecomment-1716379675)。
+
+# 钩子部署代码
+https://github.com/uniswapfoundation/v4-template 仓库包含一些用于部署钩子的帮助工具。
+
+以下是使用确定性部署代理部署钩子的代码，该代理部署在 `0x4e59b44847b379578588920cA78FbF26c0B4956C`：
+```solidity
+contract CounterScript is Script {
+    address constant CREATE2_DEPLOYER = address(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+    address constant GOERLI_POOLMANAGER = address(0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b);
+
+    function setUp() public {}
+
+    function run() public {
+        // 钩子合约必须在其地址中编码特定的标志
+        uint160 flags = uint160(
+            Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
+                | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
+        );
+
+        // 生成一个盐，将产生具有正确标志的钩子地址
+        (address hookAddress, bytes32 salt) =
+            HookMiner.find(CREATE2_DEPLOYER, flags, type(Counter).creationCode, abi.encode(address(GOERLI_POOLMANAGER)));
+
+        // 使用 CREATE2 部署钩子
+        vm.broadcast();
+        Counter counter = new Counter{salt: salt}(IPoolManager(address(GOERLI_POOLMANAGER)));
+        require(address(counter) == hookAddress, "CounterScript: hook address mismatch");
+    }
+}
+```
+https://github.com/uniswapfoundation/v4-template/blob/main/script/CounterDeploy.s.sol
+
+注意：这是一个 Foundry 脚本，对于 hardhat 不适用。
+
+
+了解更多关于部署你自己的钩子的信息 [这里](/contracts/v4/first-hook/hook-deployment)。

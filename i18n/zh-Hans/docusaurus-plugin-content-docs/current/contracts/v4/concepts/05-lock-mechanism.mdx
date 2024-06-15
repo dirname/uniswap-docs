@@ -1,0 +1,175 @@
+---
+id: lock-mechanism
+title: 锁定机制 - 闪电会计
+sidebar_position: 4
+---
+
+# 锁定入门
+
+V4 中的锁定机制确保了特定操作以原子方式执行，不受干扰，保证了池管理器状态的一致性和正确性。池管理器使用 `Lockers` 来管理一个锁队列，确保所有货币增量在释放锁之前得到结算。
+
+通过在合约上获取锁并实现 `lockAcquired` 回调函数，可以对池执行以下操作：
+
+- `swap`
+- `modifyPosition`
+- `donate`
+- `take`
+- `settle`
+- `mint`
+
+## 主要组件
+
+在 `PoolManager` 中，“锁定”本质上是一种确保某些操作协调进行、互不干扰的方式。以下是锁定机制的主要组成部分：
+
+### 1. **锁定与解锁：**
+
+- `lock` 函数是启动锁定机制的地方。它将地址元组（locker 地址，lockCaller 地址）推入锁数组。
+
+  ```solidity
+  function lock(address lockTarget, bytes calldata data) external payable override returns (bytes memory result) {
+      Lockers.push(lockTarget, msg.sender);
+
+      // 调用者在此回调中完成所有操作，包括通过调用 settle 来支付其欠款
+      result = ILockCallback(lockTarget).lockAcquired(msg.sender, data);
+
+      if (Lockers.length() == 1) {
+          if (Lockers.nonzeroDeltaCount() != 0) revert CurrencyNotSettled();
+          Lockers.clear();
+      } else {
+          Lockers.pop();
+      }
+  }
+  ```
+
+- 在锁定期间，会调用 `ILockCallback(lockTarget).lockAcquired(msg.sender, data)` 回调函数，在这里锁定的合约可以执行必要的操作。
+
+- 完成回调中的操作后，如果 `Lockers` 只有一个元素，则清除 `Lockers`，表示锁已释放；否则，从 `Lockers` 中弹出最后一个元素，表示该特定地址的锁已释放。
+
+### 2. **Lockers.sol**
+
+`Lockers` 库在瞬时存储中存储了一个 locker 地址及其对应的 lockCaller 地址的数组/队列。每个 locker 由一个元组（address locker，address lockCaller）表示，并且每个元组占用瞬时存储中的两个槽位。`push`、`pop`、`length` 和 `clear` 函数用于管理这个队列。
+
+### 3. **非零增量追踪（闪电会计）：**
+
+- `Lockers` 库还包括一个机制，通过 `nonzeroDeltaCount`、`incrementNonzeroDeltaCount` 和 `decrementNonzeroDeltaCount` 来跟踪非零增量的数量。这些函数追踪发生的变化或增量数量，并在释放锁前检查这些增量。
+
+- `_accountDelta` 函数追踪每个 locker 对于特定货币的余额变化（增量）。它首先检查增量（余额变化）是否为零；如果是，函数立即返回，因为没有需要计算的变化。如果增量非零，函数检索指定 locker 和货币的当前余额，然后通过将增量加到当前余额来计算新余额。
+
+  此函数还使用 `Lockers` 库来递增或递减追踪非零余额变化数量的 `nonzeroDeltaCount`。
+
+  ```solidity
+  function _accountDelta(Currency currency, int128 delta) internal {
+  if (delta == 0) return;
+
+        address locker = Lockers.getCurrentLocker();
+        int256 current = currencyDelta[locker][currency];
+        int256 next = current + delta;
+
+        unchecked {
+            if (next == 0) {
+                Lockers.decrementNonzeroDeltaCount();
+            } else if (current == 0) {
+                Lockers.incrementNonzeroDeltaCount();
+            }
+        }
+
+        currencyDelta[locker][currency] = next;
+  }
+  ```
+
+- 这种机制是 Uniswap V4 所谓“闪电会计”的关键部分。闪电会计是在新的单一风格池管理中引入的一种创新方法。此功能从根本上改变了交易过程中的代币管理方式。传统方法通常要求在每个操作阶段明确追踪代币余额。相比之下，闪电会计遵循的原则是，在每次交易或“锁定周期”结束时，池或调用者都不应有净欠代币，从而极大地简化了会计流程。
+
+### 工作原理
+
+PoolManager 合约中的锁定机制工作流程如下：
+
+1. 当用户想要锁定时，他们带着希望传递给回调的数据调用 `lock()` 函数。
+2. `lock()` 函数将元组（address locker，address lockCaller）推入锁队列。
+3. `lock()` 函数随后调用 `ILockCallback(lockTarget).lockAcquired(msg.sender, data)` 回调函数。
+4. 回调可以执行所需的操作，如更新用户的余额或与其他合约交互。
+5. 回调完成后，返回至 `lock()` 函数。
+6. `lock()` 函数检查队列中是否有其他锁。如果有，它会弹出队列中的下一个锁并为该锁调用回调。
+7. 如果队列中没有更多锁，`lock()` 函数返回。
+
+## 示例
+
+下面是从社区 ["流动性引导挂钩"](https://github.com/kadenzipfel/uni-lbp/blob/main/src/LiquidityBootstrappingHooks.sol) 的示例，该示例使用锁定机制并调用 `modifyPosition` 和 `swap` 函数。
+
+```solidity
+/// @notice 当池管理器获取锁时调用的回调函数
+///         用于内部修改仓位和交换代币
+/// @param data 传递给 lock 函数的数据
+/// @return 余额增量
+function lockAcquired(bytes calldata data) external override poolManagerOnly returns (bytes memory) {
+    bytes4 selector = abi.decode(data[:32], (bytes4));
+
+    if (selector == IPoolManager.modifyPosition.selector) {
+        ModifyPositionCallback memory callback = abi.decode(data[32:], (ModifyPositionCallback));
+
+        BalanceDelta delta = poolManager.modifyPosition(callback.key, callback.params, bytes(""));
+
+        if (callback.params.liquidityDelta < 0) {
+            // 减少流动性，从池管理器取走代币
+            _takeDeltas(callback.key, delta, callback.takeToOwner); // 如果指定，取至所有者（退出）
+        } else {
+            // 增加流动性，向池管理器结算代币
+            _settleDeltas(callback.key, delta);
+        }
+
+        return abi.encode(delta);
+    }
+
+    if (selector == IPoolManager.swap.selector) {
+        SwapCallback memory callback = abi.decode(data[32:], (SwapCallback));
+
+        BalanceDelta delta = poolManager.swap(callback.key, callback.params, bytes(""));
+
+        // 取走和结算增量
+        _takeDeltas(callback.key, delta, true); // 将代币取至所有者
+        _settleDeltas(callback.key, delta);
+
+        return abi.encode(delta);
+    }
+
+    return bytes("");
+}
+```
+
+值得注意的是，在释放锁之前，会检查 `nonzeroDeltaCount` 以确保所有货币增量都已结算。这是通过 `_takeDeltas` 和 `_settleDeltas` 函数完成的。
+
+```solidity
+/// @notice 根据余额增量取走代币的帮助函数
+/// @param delta 余额增量
+/// @param takeToOwner 是否将代币取至所有者
+function _takeDeltas(PoolKey memory key, BalanceDelta delta, bool takeToOwner) internal {
+    PoolId poolId = key.toId();
+    int256 delta0 = delta.amount0();
+    int256 delta1 = delta.amount1();
+
+    if (delta0 < 0) {
+        poolManager.take(key.currency0, takeToOwner ? owner[poolId] : address(this), uint256(-delta0));
+    }
+
+    if (delta1 < 0) {
+        poolManager.take(key.currency1, takeToOwner ? owner[poolId] : address(this), uint256(-delta1));
+    }
+}
+
+/// @notice 根据余额增量结算代币的帮助函数
+/// @param key 池键
+/// @param delta 余额增量
+function _settleDeltas(PoolKey memory key, BalanceDelta delta) internal {
+    int256 delta0 = delta.amount0();
+    int256 delta1 = delta.amount1();
+
+    if (delta0 > 0) {
+        key.currency0.transfer(address(poolManager), uint256(delta0));
+        poolManager.settle(key.currency0);
+    }
+
+    if (delta1 > 0) {
+        key.currency1.transfer(address(poolManager), uint256(delta1));
+        poolManager.settle(key.currency1);
+    }
+}
+```

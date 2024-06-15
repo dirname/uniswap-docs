@@ -1,0 +1,70 @@
+---
+id: swap-tokens
+title: 交换代币
+sidebar_position: 3
+---
+
+# 交换 - 步骤详解
+
+交换在循环中进行，直到指定的数量完全使用或达到价格限制。在每次迭代中，代码计算在当前价格水平下可以交换多少代币。
+
+交换会持续迭代，直到指定的数量被完全使用，或者价格的平方根达到定义的限制(`sqrtPriceLimitX96`)。
+
+以下是来自IPoolManager的`SwapParams`结构体，`Swap`事件和`swap`函数，它们用于交换代币：
+
+```solidity
+/// @notice 当currency0和currency1之间发生交换时发出
+/// @param id 池键结构的abi编码哈希，用于修改后的池
+/// @param sender 发起交换调用并接收回调的地址
+/// @param amount0 池中currency0余额的变化量
+/// @param amount1 池中currency1余额的变化量
+/// @param sqrtPriceX96 交换后池的价格平方根，作为Q64.96
+/// @param liquidity 交换后池的流动性
+/// @param tick 交换后池价格的以1.0001为底的对数
+/// @param fee 手续费
+event Swap(
+    PoolId indexed id,
+    address indexed sender,
+    int128 amount0,
+    int128 amount1,
+    uint160 sqrtPriceX96,
+    uint128 liquidity,
+    int24 tick,
+    uint24 fee
+);
+
+struct SwapParams {
+    bool zeroForOne;
+    int256 amountSpecified;
+    uint160 sqrtPriceLimitX96;
+}
+
+/// @notice 针对给定池进行交换
+function swap(PoolKey memory key, SwapParams memory params, bytes calldata hookData)
+    external
+    returns (BalanceDelta);
+```
+
+# 示例
+以下是如何通过调用`swap`函数来交换代币的示例：
+```solidity
+PoolSwapTest swapRouter = new PoolSwapTest(IPoolManager(address(manager)));
+
+PoolSwapTest.TestSettings memory testSettings =
+    PoolSwapTest.TestSettings({withdrawTokens: true, settleUsingTransfer: true});
+
+swapRouter.swap(key, params, testSettings, hookData);
+```
+注意：`PoolSwapTest`实现了`ILockCallback`接口，并添加了`lockAcquired`函数，该函数反过来调用`manager.swap`函数。
+
+# 获取锁
+关于锁定机制的完整细节在[锁定机制](/03_Locking_Mechanism/README.md)部分有详细解释。
+
+调用`swap`的合约必须实现ILockCallback接口。
+
+`PoolSwapTest.sol`有一些关于如何获取锁以及一些基本检查的示例。
+https://github.com/Uniswap/v4-core/blob/main/src/test/PoolSwapTest.sol
+
+在`PoolSwapTest`中，当在交换资产或代币的上下文中获得特定的“锁”时，会触发`lockAcquired`函数。一旦这个锁得到确认，函数会根据交换的结果处理结算。它解码提供的数据以理解上下文，要求管理器执行交换，然后根据交换导致的余额变化转移、提取或铸造代币。
+
+为了确保安全操作，函数检查是否仅由预期的`manager`合约调用。根据交换类型和设置，它处理两种类型的货币的余额调整：`currency0`和`currency1`。在结算所有余额后，它将余额变化返回给调用者。

@@ -1,0 +1,1 @@
+一个用于处理二进制定点数的库，详情请见 https://en.wikipedia.org/wiki/Q_(number_format)

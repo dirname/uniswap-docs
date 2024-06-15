@@ -1,0 +1,86 @@
+{
+  "link.title.Developers": {
+    "message": "开发者",
+    "description": "在页脚中标题为“开发者”的页脚链接列的标题"
+  },
+  "link.title.Github": {
+    "message": "Github",
+    "description": "在页脚中标题为“Github”的页脚链接列的标题"
+  },
+  "link.title.Ecosystem": {
+    "message": "生态系统",
+    "description": "在页脚中标题为“生态系统”的页脚链接列的标题"
+  },
+  "link.title.Community": {
+    "message": "社区",
+    "description": "在页脚中标题为“社区”的页脚链接列的标题"
+  },
+  "link.item.label.Feedback": {
+    "message": "反馈",
+    "description": "指向 https://forms.gle/13XtjmkwdXQ2jMn26 的链接，标签=反馈"
+  },
+  "link.item.label.Bug Bounty": {
+    "message": "赏金计划",
+    "description": "指向 https://github.com/Uniswap/uniswap-v3-periphery/blob/main/bug-bounty.md 的链接，标签=赏金计划"
+  },
+  "link.item.label.#dev-chat": {
+    "message": "#开发者聊天",
+    "description": "指向 https://discord.com/invite/uniswap 的链接，标签=#dev-chat"
+  },
+  "link.item.label.Whitepaper": {
+    "message": "白皮书",
+    "description": "指向 https://uniswap.org/whitepaper-v3.pdf 的链接，标签=白皮书"
+  },
+  "link.item.label.uniswap-v3-core": {
+    "message": "uniswap-v3-core",
+    "description": "指向 https://github.com/Uniswap/uniswap-v3-core 的链接，标签=uniswap-v3-core"
+  },
+  "link.item.label.uniswap-v3-sdk": {
+    "message": "uniswap-v3-sdk",
+    "description": "指向 https://github.com/Uniswap/uniswap-v3-sdk 的链接，标签=uniswap-v3-sdk"
+  },
+  "link.item.label.uniswap-v3-periphery": {
+    "message": "uniswap-v3-periphery",
+    "description": "指向 https://github.com/Uniswap/uniswap-v3-periphery 的链接，标签=uniswap-v3-periphery"
+  },
+  "link.item.label.Deployment addresses": {
+    "message": "部署地址",
+    "description": "指向 https://github.com/Uniswap/uniswap-v3-periphery/blob/main/deploys.md 的链接，标签=部署地址"
+  },
+  "link.item.label.Home": {
+    "message": "主页",
+    "description": "指向 https://uniswap.org/ 的链接，标签=主页"
+  },
+  "link.item.label.App": {
+    "message": "应用",
+    "description": "指向 https://app.uniswap.org/ 的链接，标签=应用"
+  },
+  "link.item.label.Analytics": {
+    "message": "分析",
+    "description": "指向 https://info.uniswap.org/home 的链接，标签=分析"
+  },
+  "link.item.label.Token Lists": {
+    "message": "代币列表",
+    "description": "指向 https://tokenlists.org/ 的链接，标签=代币列表"
+  },
+  "link.item.label.Brand Assets": {
+    "message": "品牌资源",
+    "description": "指向 https://uniswap.org/Uniswap_brand_assets.zip 的链接，标签=品牌资源"
+  },
+  "link.item.label.Governance": {
+    "message": "治理",
+    "description": "指向 https://gov.uniswap.org/ 的链接，标签=治理"
+  },
+  "link.item.label.Discord": {
+    "message": "Discord",
+    "description": "指向 https://discord.com/invite/uniswap 的链接，标签=Discord"
+  },
+  "link.item.label.Twitter": {
+    "message": "Twitter",
+    "description": "指向 https://twitter.com/Uniswap 的链接，标签=Twitter"
+  },
+  "link.item.label.Blog": {
+    "message": "博客",
+    "description": "指向 https://uniswap.org/blog/ 的链接，标签=博客"
+  }
+}

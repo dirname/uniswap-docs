@@ -1,0 +1,121 @@
+---
+id: hook-deployment
+title: 钩子部署
+sidebar_position: 3
+---
+
+# 部署
+部署 Uniswap V4 Hooks 涉及几个步骤：
+
+1. **部署池管理器合约**：此合约通常在许多测试环境中预先部署。但是，
+   如果需要，你也可以选择在本地机器上部署它。
+
+2. **部署钩子合约**：钩子合约需要在预设的地址部署。你可以使用
+   `CREATE2` 进行确定性部署。一个确定性部署代理，通常位于
+   `0x4e59b44847b379578588920cA78FbF26c0B4956C`，用于这个目的，并且在大多数
+   环境中已经可用。
+
+3. **部署测试代币**：这些代币对于创建池至关重要。它们需要在
+   初始化池之前部署。
+
+4. **使用钩子合约地址初始化池**：这通过调用
+   池管理器合约上的 `initialize(PoolKey memory key, uint160 sqrtPriceX96, bytes calldata hookData)` 函数来实现。
+
+5. **添加流动性或修改位置**：如果你想向池中添加流动性或更改其位置，一个
+   实现了 `ILockCallback` 接口的实用合约是必需的。你可以考虑部署一个像 `PoolModifyPositionTest` 这样的实用合约来进行这些操作。
+
+
+## 部署脚本
+模板中包含了一些帮助部署钩子的脚本。这些脚本位于 `scripts` 文件夹中。
+
+我们逐一来看这些脚本：
+
+### 1. 部署你自己的代币
+模板中包含了用于测试的模拟 UNI 和模拟 USDC 合约。使用以下命令进行部署：
+```shell
+ forge create script/mocks/mUNI.sol:MockUNI \
+ --rpc-url [your_rpc_url_here] \
+ --private-key [your_private_key_on_goerli_here] \
+
+ forge create script/mocks/mUSDC.sol:MockUSDC \
+ --rpc-url [your_rpc_url_here] \
+ --private-key [your_private_key_on_goerli_here] \
+```
+
+
+### 2. script/01_CreatePool.s.sol
+此脚本包含了使用现有钩子初始化池的步骤。它使用预先部署的池管理器合约和
+代币合约
+```solidity
+contract CreatePoolScript is Script {
+    using CurrencyLibrary for Currency;
+
+    //已部署合约的地址
+    address constant GOERLI_POOLMANAGER = address(0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b); //部署到 GOERLI 的池管理器
+    address constant MUNI_ADDRESS = address(0xbD97BF168FA913607b996fab823F88610DCF7737); //部署到 GOERLI 的 mUNI -- 在这里插入你自己的合约地址
+    address constant MUSDC_ADDRESS = address(0xa468864e673a807572598AB6208E49323484c6bF); //部署到 GOERLI 的 mUSDC -- 在这里插入你自己的合约地址
+    address constant HOOK_ADDRESS = address(0x3CA2cD9f71104a6e1b67822454c725FcaeE35fF6); //部署到 goerli 的钩子合约地址 -- 你可以使用这个钩子地址或者部署你自己的!
+
+    IPoolManager manager = IPoolManager(GOERLI_POOLMANAGER);
+
+    function run() external {
+        // 对代币进行排序！
+        address token0 = uint160(MUSDC_ADDRESS) < uint160(MUNI_ADDRESS) ? MUSDC_ADDRESS : MUNI_ADDRESS;
+        address token1 = uint160(MUSDC_ADDRESS) < uint160(MUNI_ADDRESS) ? MUNI_ADDRESS : MUSDC_ADDRESS;
+        uint24 swapFee = 4000;
+        int24 tickSpacing = 10;
+
+        // floor(sqrt(1) * 2^96)
+        uint160 startingPrice = 79228162514264337593543950336;
+
+        bytes memory hookData = abi.encode(block.timestamp);
+
+        PoolKey memory pool = PoolKey({
+            currency0: Currency.wrap(token0),
+            currency1: Currency.wrap(token1),
+            fee: swapFee,
+            tickSpacing: tickSpacing,
+            hooks: IHooks(HOOK_ADDRESS)
+        });
+
+        // 将池转换为 ID，以便你可以用于修改位置、交换等。
+        PoolId id = PoolIdLibrary.toId(pool);
+        bytes32 idBytes = PoolId.unwrap(id);
+
+        console.log("下面的池 ID");
+        console.logBytes32(bytes32(idBytes));
+
+        vm.broadcast();
+        manager.initialize(pool, startingPrice, hookData);
+    }
+}
+```
+### 3. script/00_Counter.s.sol
+此脚本使用确定性部署代理部署 Counter 钩子。它使用预先部署的池管理器合约
+和代理
+
+```solidity
+contract CounterScript is Script {
+    address constant CREATE2_DEPLOYER = address(0x4e59b44847b379578588920cA78FbF26c0B4956C);
+    address constant GOERLI_POOLMANAGER = address(0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b);
+
+    function setUp() public {}
+
+    function run() public {
+        // 钩子合约必须在其地址中编码特定标志
+        uint160 flags = uint160(
+            Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
+                | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
+        );
+
+        // 挖掘一个将产生具有正确标志的钩子地址的盐值
+        (address hookAddress, bytes32 salt) =
+            HookMiner.find(CREATE2_DEPLOYER, flags, type(Counter).creationCode, abi.encode(address(GOERLI_POOLMANAGER)));
+
+        // 使用 CREATE2 部署钩子
+        vm.broadcast();
+        Counter counter = new Counter{salt: salt}(IPoolManager(address(GOERLI_POOLMANAGER)));
+        require(address(counter) == hookAddress, "CounterScript: 钩子地址不匹配");
+    }
+}
+```

@@ -1,0 +1,416 @@
+---
+id: getting-started
+title: 开始使用 Swap 小部件
+sidebar_label: 开始使用
+sidebar_position: 1
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import useBaseUrl from '@docusaurus/useBaseUrl'
+
+# 开始使用 Swap 小部件
+
+本指南将引导您在两分钟内将 Swap 小部件嵌入到您的网站中，无论您的网站是否已经是一个去中心化应用（dApp）。通过 Swap 小部件，您的用户可以在不离开您的网站的情况下在 Uniswap 协议上交易 ERC-20 代币！
+
+这是一个 Swap 小部件的实时预览。
+
+<iframe
+  width="376"
+  height="376"
+  scrolling="no"
+  src="https://widgets-uniswap.vercel.app/_renderer.html?_fixtureId=%7B%22path%22%3A%22src%2Fcosmos%2FSwap.fixture.tsx%22%2C%22name%22%3Anull%7D"
+></iframe>
+
+示例用例包括：
+
+- 为 Uniswap 协议构建自定义前端
+- 在 DeFi 应用程序中交换资产
+- 购买代币以参与您的 web3 社区（例如 FWB 或游戏代币）
+- 将货币转换为购买 NFT 所需的货币（例如 WETH）
+
+您可以通过自定义颜色、字体和代币列表来使小部件看起来像您应用程序的原生部分，以匹配您的应用主题。本指南将教会您如何操作。
+
+## 安装小部件库 {#installing-library}
+
+首先，使用 npm 或 Yarn 安装小部件库。如果您尚未使用它，您还需要安装 `react-redux`。
+
+```bash npm2yarn
+npm install --save @uniswap/widgets react-redux
+```
+
+## 将 Swap 小部件添加到您的应用 {#adding-the-widget}
+
+接下来，在您的应用程序中嵌入 React 组件。
+
+```jsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget />
+  </div>
+}
+```
+
+就这样！您现在应该在您的网站上看到一个完全功能性的 Swap 小部件。小部件是自包含的，并且优雅地处理所有与 Uniswap 协议的交互。它利用了[Auto Router](/sdk/v3/guides/swaps/routing) 来计算 Uniswap v2 和 v3 池之间的最佳价格。
+
+在 [widgets-demo](https://github.com/Uniswap/widgets-demo) 仓库的 `/cra` 和 `/nextjs` 分支中查看 Swap 小部件的完整实现。
+
+:::note Create React App V4
+如果使用 [Next.js](https://nextjs.org/) 或 [Create React App](https://create-react-app.dev/) V5，所有代码片段都将无缝运行。但是，如果您使用的是 Create React App V4，则需要使用以下 `import` 语句：
+
+```jsx
+import { SwapWidget } from '@uniswap/widgets/dist/index.js'
+import '@uniswap/widgets/dist/fonts.css'
+```
+
+:::
+
+# 推荐参数 {#recommended-parameters}
+
+Swap 小部件是一个 React 组件，可以轻松导入到任何 React 项目中。它的设计初衷是开箱即用，无需任何必需的参数或 web3 集成。在所有部署了 Uniswap 协议的网络上都支持交易。
+
+虽然小部件在没有任何参数的情况下就可以正常工作，但我们强烈建议集成者提供 [JSON-RPC 端点](#json-rpc-endpoint)，例如来自 [Chainnodes](https://www.chainnodes.org)，Infura 或 Alchemy 的端点。现有的 dApps 也可以提供其现有的 [web3 提供商](#web3-provider) 以便将小部件无缝集成到其 dApp 中。
+
+有额外的 [可选参数](/sdk/swap-widget/reference/v2#optional-parameters) 可用于根据您的独特用例定制 Swap 小部件的外观和性能。
+
+## web3 提供商 {#web3-provider}
+
+Swap 小部件使用 web3 `provider` 属性来允许用户连接他们的钱包，获取余额，并通过用户连接的钱包提交交易。
+
+如果您的应用没有维护自己的 web3 提供商，您可以省略 `provider` 属性。小部件将使用内置的钱包连接功能（对于 [WalletConnect](https://walletconnect.com/) 和 [MetaMask](https://metamask.io/)），使您轻松地在应用中集成 web3！
+
+如果您已经有 web3 提供商，可以直接将您的提供商对象传递给 `provider` 属性。[ethers](https://docs.ethers.io/v5/api/providers/provider/) 和 [web3.js](https://web3js.readthedocs.io/en/v1.5.2/index.html) 提供商对象都与小部件兼容，任何 [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) 提供商也同样兼容。
+您可以直接使用从 [web3-react](https://github.com/Uniswap/web3-react) 或 [wagmi](https://wagmi.sh/) 返回的提供者（两者都是 ethers 提供者）。如果没有连接到钱包，它仍然会被用来从链上读取数据，但小部件仍会提示用户“连接钱包”。
+
+:::note 确保使用已连接钱包的提供商
+当使用 [wagmi@v0.11](https://wagmi.sh/) 时，`useProvider()` 将返回备用提供商，而不是已连接钱包的提供商。您应该改为传递 `useSigner<JsonRpcSigner>().data?.provider` 以反映用户已连接的钱包。
+:::
+
+如果您在应用中维护 web3 提供商，还应考虑拦截 Swap 小部件的钱包连接流程。通过向 `onConnectWalletClick` 属性传递返回 `false` 的处理器，可以做到这一点，该属性在单击小部件的“连接钱包”按钮时触发。检查如 [web3-react](https://github.com/Uniswap/web3-react)、BlockNative 的 [Onboard](https://www.blocknative.com/onboard) 或 Aragon 的 [useWallet()](https://github.com/aragon/use-wallet) 这样的库来构建您自己的流程。要完全隐藏 Swap 小部件的钱包连接流程，请向 `hideConnectionUI` 属性传递 `true`。
+
+小部件将匹配传递的提供商当前选择的网络。如果用户在您的应用或其连接的钱包中切换网络，此更改也将传播到小部件。如果用户连接到 Swap 小部件不支持的网络，小部件将优雅地禁用自身。
+
+```tsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+// 我们建议您传递一个 web3 提供商。
+import { provider } from './your/provider'
+
+// 我们建议您传递您自己的 JSON-RPC 端点。
+const jsonRpcUrlMap = {
+  1: ['https://mainnet.infura.io/v3/<YOUR_INFURA_PROJECT_ID>'],
+  3: ['https://ropsten.infura.io/v3/<YOUR_INFURA_PROJECT_ID>']
+}
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget provider={provider} jsonRpcUrlMap={jsonRpcUrlMap} />
+  </div>
+}
+```
+
+## JSON-RPC 端点 {#json-rpc-endpoint}
+
+JSON-RPC 端点用于在没有 `provider` 连接的情况下读取数据。我们强烈建议您要么向 `provider` 属性传递 Web3 提供商，要么向 `jsonRpcUrlMap` 属性传递 JSON-RPC 端点 URL。
+
+小部件将使用这些端点来获取链上数据并提交交易以进行签名。如果用户连接了 MetaMask 钱包，小部件将在可能的情况下使用 MetaMask 提供的 JSON-RPC。（[查看所有受支持的小部件链的列表](https://github.com/Uniswap/widgets/blob/main/src/constants/chains.ts#L4)）
+
+如果您还没有 JSON-RPC 端点，可以使用诸如 [Chainnodes](https://www.chainnodes.org)、[Infura](https://infura.io/product/ethereum) 或 [Alchemy](https://www.alchemy.com/supernode) 这样的服务轻松创建它们。
+
+如果您选择不提供 `jsonRpcUrlMap` 属性或缺少某些链的端点，小部件将使用免费公共 JSON-RPC 端点，以便用户仍能与小部件互动并获取价格报价。然而，这些公共端点并不推荐在生产环境中使用，它们受到严重限制，并不一定可靠。在可能的情况下，我们建议您提供自己的端点！
+
+# 自定义 Swap 小部件 {#customizing-widget}
+
+您可以通过设置 [可选参数](/sdk/swap-widget/reference/v2#optional-parameters) 来定制 Swap 小部件的外观和功能，以适应您的 dApp。
+
+## 自定义宽度 {#customizing-width}
+
+Swap 小部件的高度固定为 360px，宽度默认为 360px。您不能修改小部件的高度。您可以将宽度修改至最小宽度 300px。
+
+您可以通过向小部件的 `width` 属性传递数字（像素）或有效的 CSS 宽度来自定义宽度。
+
+```tsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget
+      width={360} // 自定义宽度（像素）
+    />
+  </div>
+}
+```
+
+例如：
+
+- `width={360}` 设置宽度为 360 像素
+- `width="100%"` 设置宽度动态填充父容器的 100%
+- `width="20em"` 设置宽度为 20 * 16 = 320 像素，因为 16px 是小部件的基本字体大小
+
+推荐和默认的宽度为 360 像素。
+
+## 自定义主题 {#customizing-theme}
+
+您可以自定义 Swap 小部件的颜色、字体和边框半径，以匹配您的 dApp 的外观和感觉。您还可以在浅色和深色模式之间切换。本节将解释如何使用您自己的 `theme` 来自定义小部件的每个属性。
+
+请查阅 Swap 小部件的 [示例](/sdk/swap-widget/guides/examples)，以及如果您想先进行模拟的 [Figma 文件](https://www.figma.com/file/m0pVMlgAgSoaIrXlM3VRUG/Widgets-(External)?node-id=4302%3A18261)！
+
+<ThemedImage
+  alt="Swap 小部件主题属性"
+  className="illustration"
+  sources={{
+    light: useBaseUrl('/img/widgets/swap-widget-attributes-light.png'),
+    dark: useBaseUrl('/img/widgets/swap-widget-attributes-dark.png'),
+  }}
+/>
+
+<ThemedImage
+  alt="Swap 小部件主题示例"
+  className="illustration"
+  sources={{
+    light: useBaseUrl('/img/widgets/swap-widget-example-light.png'),
+    dark: useBaseUrl('/img/widgets/swap-widget-example-dark.png'),
+  }}
+/>
+
+### 覆盖属性 {#overriding-attributes}
+
+您可以通过创建 `Theme` 对象并定义您希望覆盖的属性来自定义小部件的特定属性。任何未定义的属性都将回退到默认主题。例如，以下是一个简单的 `Theme`，它移除了边框半径并设置了自定义字体系列。
+
+```tsx
+import { Theme, SwapWidget } from '@uniswap/widgets'
+
+// 定义一个自定义主题以覆盖默认属性
+const theme: Theme = {
+  borderRadius: 0,
+  fontFamily: '"Helvetica"',
+}
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget theme={theme} />
+  </div>
+}
+```
+
+请注意，`borderRadius` 属性是从 0 到 1 的乘数，表示要应用多少半径。由于小部件使用不同的边框半径值（例如，内部边缘的半径比外部边缘更紧），`borderRadius` 将在所有实例上应用您的乘数值，以便边框半径仍然看起来比例正确。
+
+:::note 导入字体
+Swap 小部件字体必须显式导入 `import '@uniswap/widgets/fonts.css'`。但是，如果您用自己的字体或默认字体（如上面示例中的 Helvetica）覆盖 Swap 小部件字体，您可以删除此 `import` 语句。
+:::
+
+### 启用代币颜色提取 {#enabling-color-extraction}
+
+默认情况下，输出模块的背景颜色将由 `module` 属性设置。您可以选择启用颜色提取，以使输出模块充满所选输出代币的颜色。在上面的例子中，DAI 是输出代币，因此输出模块充满了 DAI 黄色。
+
+要启用颜色提取，请在您的 `Theme` 对象中将 `tokenColorExtraction` 属性设置为 `true`。
+
+```tsx
+import { Theme, SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+const enableColorExtractionTheme: Theme = {
+  tokenColorExtraction: true, // 启用输出代币的颜色提取
+}
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget theme={enableColorExtractionTheme} />
+  </div>
+}
+```
+
+### 切换浅色和深色模式 {#toggling-light-dark-mode}
+
+Swap 小部件提供了默认的浅色主题和深色主题作为起点。您可以导入每个主题并扩展它们以创建自己的主题。如果您的应用可以在浅色和深色模式之间切换，可以按照下面的示例将该状态向下传播到小部件。
+
+```tsx
+import { darkTheme, lightTheme, Theme, SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+let darkMode = true // 动态切换深色模式的开启和关闭
+function App() {
+  <div className="Uniswap">
+    <SwapWidget theme={darkMode ? darkTheme : lightTheme} />
+  </div>
+}
+```
+
+### 匹配系统对浅色和深色模式的偏好 {#matching-system-light-dark-mode}
+
+您可以使用 `useSystemTheme` 钩子来匹配用户的系统对浅色/深色模式的偏好。这将根据用户的系统配置返回默认的小部件浅色或深色主题。您可以在此基础主题上进一步自定义，如下一节所示。
+
+```tsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+function useSystemTheme() {
+  // 访问
+}
+
+function App() {
+  const theme = useSystemTheme() // 获取与用户系统偏好相匹配的主题
+  <div className="Uniswap">
+    <SwapWidget theme={theme} />
+  </div>
+}
+```
+
+### 扩展主题 {#extending-themes}
+
+您可以使用自定义属性扩展任何主题。以下示例扩展了基本的浅色和深色主题，使用自定义颜色。
+
+```tsx
+import { darkTheme, lightTheme, Theme, SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+const myLightTheme: Theme = {
+  ...lightTheme, // 扩展 lightTheme
+  accent: '#FF007A',
+  primary: '#000000',
+  secondary: '#565A69',
+}
+
+const myDarkTheme: Theme = {
+  ...darkTheme, // 扩展 darkTheme
+  accent: '#2172E5',
+  primary: '#FFFFFF',
+  secondary: '#888D9B',
+}
+
+let darkMode = true
+function App() {
+  <div className="Uniswap">
+    <SwapWidget theme={darkMode ? myDarkTheme : myLightTheme} />
+  </div>
+}
+```
+
+## 自定义代币列表 {#customizing-token-lists}
+
+默认情况下，小部件将在选择器中使用 [Uniswap Labs 默认代币列表](https://tokenlists.org/token-list?url=https://gateway.ipfs.io/ipns/tokens.uniswap.org)。
+
+### 自定义默认代币列表 {#customizing-default-token-list}
+
+如果您希望在小部件中提供一组不同的代币，可以提供自定义 `tokenList` 参数。您可以在 [tokenlists.org](https://tokenlists.org/) [浏览热门代币列表](https://tokenlists.org/) 以找到适合您需求的代币列表，然后将其 URL 作为参数传递。
+
+```jsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+const CMC_TOKEN_LIST = 'https://api.coinmarketcap.com/data-api/v3/uniswap/all.json'
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget
+      tokenList={CMC_TOKEN_LIST} // 使用 CoinMarketCap 代币列表
+    />
+  </div>
+}
+```
+
+或者，您可以创建自己的代币列表。有两种方式可以为小部件提供自己的代币列表。
+
+第一个选项是 [创建完整的代币列表](https://github.com/Uniswap/token-lists#authoring-token-lists)，在您自己的 URI 主机上托管它，并像上面的示例一样将 URI 作为参数传递。如果要在应用程序或社区的多个地方使用相同的代币列表，此选项是推荐的。
+
+第二个也是最简单的选项是在行内构造自定义代币列表作为代币数组。模式等同于 [tokenlist JSON schema](https://github.com/Uniswap/token-lists/blob/main/src/tokenlist.schema.json) 中的 `tokens` 数组。此选项可以让您跳过部署、主机和完整 URI 代币列表的版本控制。以下是一个包含仅包含 DAI、USDT 和 USDC 代币（除了 ETH，无论代币列表如何，它总是可用）的行内代币列表示例。
+
+```jsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+// 您也可以将代币列表作为 JSON 传递，只要它符合模式即可
+const MY_TOKEN_LIST = [
+	{
+    "name": "Dai Stablecoin",
+    "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "symbol": "DAI",
+    "decimals": 18,
+    "chainId": 1,
+    "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png"
+  },
+	{
+    "name": "Tether USD",
+    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "symbol": "USDT",
+    "decimals": 6,
+    "chainId": 1,
+    "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png"
+  },
+  {
+    "name": "USD Coin",
+    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "symbol": "USDC",
+    "decimals": 6,
+    "chainId": 1,
+    "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
+  },
+]
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget tokenList={MY_TOKEN_LIST} />
+  </div>
+}
+```
+
+请注意，Swap 小部件仅对远程托管的代币列表强制执行元数据验证，而不会对像本示例这样作为字面值传递给小部件的代币列表数据执行验证。
+
+如果您想向代币列表中添加 Layer 2 代币，可以添加扩展字段。请参阅此 [GitHub 问题](https://github.com/Uniswap/token-lists/issues/51#issuecomment-952268629) 了解详细信息。
+
+## 自定义默认输入和输出代币 {#customizing-default-input-output-tokens}
+
+您可以将 `defaultInputTokenAddress`、`defaultInputAmount`、`defaultOutputTokenAddress` 和 `defaultOutputAmount` 设置为分别预填充输入和输出代币字段。当小部件出现在您知道用户正在评估交易的代币上下文中时，这是有用的。例如，如果小部件出现在显示 WBTC 价格图表的页面上，那么将 WBTC 预选为小部件中的输出代币是有帮助的。
+
+如果您的页面不需要任何特定的默认值，那么推荐的默认输入代币是活动网络的原生资产（例如 ETH），并且不推荐默认输出代币。由于 ETH 没有地址，您可以传递 `'NATIVE'` 作为参数将其设置为默认输入或输出代币。
+
+以下示例将默认输入设置为 2 ETH，将默认输出代币设置为 WBTC。
+
+```tsx
+import { SwapWidget } from '@uniswap/widgets'
+import '@uniswap/widgets/fonts.css'
+
+// 默认的 Uniswap 代币列表
+const UNISWAP_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
+
+// 使用连接链的原生代币作为默认输入代币
+const NATIVE = 'NATIVE' // 原生代币的特殊地址
+
+// 将 WBTC 设置为默认输出代币
+const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+
+function App() {
+  <div className="Uniswap">
+    <SwapWidget
+      tokenList={UNISWAP_TOKEN_LIST}
+      defaultInputTokenAddress={NATIVE}
+      defaultInputAmount={2}
+      defaultOutputTokenAddress={WBTC}
+    />
+  </div>
+}
+```
+
+## 了解 Swap 小部件的状态 {#understanding-widget-states}
+
+小部件具有两种主要的连接状态，具体取决于用户是否已连接钱包。
+
+<ThemedImage
+  alt="Swap 小部件状态"
+  className="illustration"
+  sources={{
+    light: useBaseUrl('/img/widgets/swap-widget-states-light.png'),
+    dark: useBaseUrl('/img/widgets/swap-widget-states-dark.png'),
+  }}
+/>
+
+1. **在连接钱包之前**，小部件将使用 JSON-RPC 端点来获取代币价格数据并提供交易报价，但提交交易将被禁用。
+2. **在连接钱包之后**，小部件将完全功能化。用户将能够获取交易报价并使用其连接钱包的 JSON-RPC 端点和 web3 提供商提交交换交易。
+
+:::note 有问题？
+加入 [Discord 频道](https://discord.com/channels/597638925346930701/941447445844463676) 以提问并从 Uniswap 社区获得支持。
+:::

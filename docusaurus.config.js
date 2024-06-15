@@ -9,7 +9,11 @@ module.exports = {
     // Determines if staging env
     stagingEnv: process.env.REACT_APP_STAGING,
     // From node
-    nodeEnv: process.env.NODE_ENV,
+    nodeEnv: process.env.NODE_ENV
+  },
+  i18n: {
+    defaultLocale: 'zh-Hans',
+    locales: ['en', 'zh-Hans']
   },
   title: 'Uniswap',
   tagline: 'Documentation and Guides',
@@ -23,69 +27,73 @@ module.exports = {
   themeConfig: {
     image: 'img/twitter_card_bg.jpg',
     prism: {
-      additionalLanguages: ['solidity'],
+      additionalLanguages: ['solidity']
     },
     algolia: {
       apiKey: '32465e2ab6f7554ff014e64c0d92171c',
       indexName: 'v3-docs',
-      appId: 'S0IDD0YGLZ',
+      appId: 'S0IDD0YGLZ'
     },
     navbar: {
       title: 'Uniswap Docs',
       logo: {
         alt: 'Uniswap Unicorn',
-        src: 'img/uni_dark_icon.svg',
+        src: 'img/uni_dark_icon.svg'
       },
       items: [
         {
           to: '/concepts/overview',
           label: 'Concepts',
           position: 'left',
-          className: 'V3_active',
+          className: 'V3_active'
         },
         {
           to: '/contracts/v3/overview',
           label: 'Contracts',
           position: 'left',
-          className: 'V3_active',
+          className: 'V3_active'
         },
         {
           to: '/sdk/v3/overview',
           label: 'SDKs',
           position: 'left',
-          className: 'V3_active',
+          className: 'V3_active'
         },
         {
           to: '/api/subgraph/overview',
           label: 'APIs',
           position: 'left',
-          className: 'V3_active',
+          className: 'V3_active'
         },
         {
           label: 'Give Feedback',
           to: 'https://forms.gle/13XtjmkwdXQ2jMn26',
           position: 'right',
-          className: 'persistent',
+          className: 'persistent'
         },
         {
           label: 'Whitepaper',
           to: 'https://uniswap.org/whitepaper-v3.pdf',
           position: 'right',
-          className: 'persistent',
+          className: 'persistent'
         },
         {
           href: 'https://github.com/uniswap/uniswap-docs',
           label: 'GitHub',
           position: 'right',
-          className: 'persistent',
+          className: 'persistent'
         },
         {
           href: 'https://unigrants.org/',
           label: 'Grants',
           position: 'right',
-          className: 'persistent',
+          className: 'persistent'
         },
-      ],
+        {
+          type: 'localeDropdown',
+          position: 'right'
+        }
+      ]
     },
     footer: {
       // style: "dark",
@@ -95,90 +103,90 @@ module.exports = {
           items: [
             {
               label: 'Feedback',
-              href: 'https://forms.gle/13XtjmkwdXQ2jMn26',
+              href: 'https://forms.gle/13XtjmkwdXQ2jMn26'
             },
             {
               label: 'Bug Bounty',
-              href: 'https://github.com/Uniswap/uniswap-v3-periphery/blob/main/bug-bounty.md',
+              href: 'https://github.com/Uniswap/uniswap-v3-periphery/blob/main/bug-bounty.md'
             },
             {
               label: '#dev-chat',
-              href: 'https://discord.com/invite/uniswap',
+              href: 'https://discord.com/invite/uniswap'
             },
             {
               label: 'Whitepaper',
-              href: 'https://uniswap.org/whitepaper-v3.pdf',
-            },
-          ],
+              href: 'https://uniswap.org/whitepaper-v3.pdf'
+            }
+          ]
         },
         {
           title: 'Github',
           items: [
             {
               label: 'uniswap-v3-core',
-              href: 'https://github.com/Uniswap/uniswap-v3-core',
+              href: 'https://github.com/Uniswap/uniswap-v3-core'
             },
             {
               label: 'uniswap-v3-sdk',
-              href: 'https://github.com/Uniswap/uniswap-v3-sdk',
+              href: 'https://github.com/Uniswap/uniswap-v3-sdk'
             },
             {
               label: 'uniswap-v3-periphery',
-              href: 'https://github.com/Uniswap/uniswap-v3-periphery',
+              href: 'https://github.com/Uniswap/uniswap-v3-periphery'
             },
             {
               label: 'Deployment addresses',
-              href: 'https://github.com/Uniswap/uniswap-v3-periphery/blob/main/deploys.md',
-            },
-          ],
+              href: 'https://github.com/Uniswap/uniswap-v3-periphery/blob/main/deploys.md'
+            }
+          ]
         },
         {
           title: 'Ecosystem',
           items: [
             {
               label: 'Home',
-              href: 'https://uniswap.org/',
+              href: 'https://uniswap.org/'
             },
             {
               label: 'App',
-              href: 'https://app.uniswap.org/',
+              href: 'https://app.uniswap.org/'
             },
             {
               label: 'Analytics',
-              href: 'https://info.uniswap.org/home',
+              href: 'https://info.uniswap.org/home'
             },
             {
               label: 'Token Lists',
-              href: 'https://tokenlists.org/',
+              href: 'https://tokenlists.org/'
             },
             {
               label: 'Brand Assets',
-              href: 'https://uniswap.org/Uniswap_brand_assets.zip',
-            },
-          ],
+              href: 'https://uniswap.org/Uniswap_brand_assets.zip'
+            }
+          ]
         },
         {
           title: 'Community',
           items: [
             {
               label: 'Governance',
-              href: 'https://gov.uniswap.org/',
+              href: 'https://gov.uniswap.org/'
             },
             {
               label: 'Discord',
-              href: 'https://discord.com/invite/uniswap',
+              href: 'https://discord.com/invite/uniswap'
             },
             {
               label: 'Twitter',
-              href: 'https://twitter.com/Uniswap',
+              href: 'https://twitter.com/Uniswap'
             },
             {
               label: 'Blog',
-              href: 'https://uniswap.org/blog/',
-            },
-          ],
-        },
-      ],
+              href: 'https://uniswap.org/blog/'
+            }
+          ]
+        }
+      ]
       // copyright: `unlicensed`,
     },
     colorMode: {
@@ -191,8 +199,8 @@ module.exports = {
 
       // Should we use the prefers-color-scheme media-query,
       // using user system preferences, instead of the hardcoded defaultMode
-      respectPrefersColorScheme: true,
-    },
+      respectPrefersColorScheme: true
+    }
   },
   presets: [
     [
@@ -204,29 +212,29 @@ module.exports = {
           remarkPlugins: [math],
           rehypePlugins: [katex],
           editUrl: 'https://github.com/uniswap/uniswap-docs/tree/main/',
-          includeCurrentVersion: true,
+          includeCurrentVersion: true
         },
         blog: {
           remarkPlugins: [math],
           rehypePlugins: [katex],
           path: 'blog/',
           blogTitle: 'Engineering Blog',
-          blogSidebarCount: 0,
+          blogSidebarCount: 0
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
-          customCss2: require.resolve('./src/css/colors.css'),
-        },
-      },
-    ],
+          customCss2: require.resolve('./src/css/colors.css')
+        }
+      }
+    ]
   ],
   stylesheets: [
     {
       href: 'https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css',
       type: 'text/css',
       integrity: 'sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM',
-      crossorigin: 'anonymous',
-    },
+      crossorigin: 'anonymous'
+    }
   ],
   plugins: [
     ['@saucelabs/theme-github-codeblock', {}],
@@ -237,24 +245,24 @@ module.exports = {
           // 1/9/23 V3 SDK Guide Redirects
           {
             to: '/sdk/v3/guides/background',
-            from: '/sdk/v3/guides/quick-start',
+            from: '/sdk/v3/guides/quick-start'
           },
           {
             to: '/sdk/v3/guides/swaps/quoting',
-            from: ['/sdk/v3/guides/creating-a-pool', '/sdk/v3/guides/fetching-prices'],
+            from: ['/sdk/v3/guides/creating-a-pool', '/sdk/v3/guides/fetching-prices']
           },
           {
             to: '/sdk/v3/guides/swaps/trading',
-            from: '/sdk/v3/guides/creating-a-trade',
+            from: '/sdk/v3/guides/creating-a-trade'
           },
           {
             to: '/sdk/v3/guides/swaps/routing',
-            from: '/sdk/v3/guides/auto-router',
+            from: '/sdk/v3/guides/auto-router'
           },
           {
             to: '/sdk/v3/guides/liquidity/modifying-position',
-            from: ['/sdk/v3/guides/liquidity/adding', '/sdk/v3/guides/liquidity/removing'],
-          },
+            from: ['/sdk/v3/guides/liquidity/adding', '/sdk/v3/guides/liquidity/removing']
+          }
         ],
         createRedirects(existingPath) {
           // V3 Redirects
@@ -298,8 +306,8 @@ module.exports = {
 
           // Return a falsy value: no redirect created
           return undefined
-        },
-      },
-    ],
-  ],
+        }
+      }
+    ]
+  ]
 }

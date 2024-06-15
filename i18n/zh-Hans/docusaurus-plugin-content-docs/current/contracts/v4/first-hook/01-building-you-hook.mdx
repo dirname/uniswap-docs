@@ -1,0 +1,118 @@
+---
+id: building-your-own-hook
+title: 构建你自己的钩子
+sidebar_position: 1
+---
+
+# 构建你自己的钩子
+每当开始一个新项目时，使用能够协助开发并使设置过程更简单的框架总是一个好主意。同样地，当你构建自己的钩子时，你可能希望使用一些工具来：
+
+1) 为你的钩子地址挖掘正确的盐值
+2) 使用一个路由器获取锁，然后调用池管理器上的各种函数
+3) 将钩子部署到确定性地址
+
+许多这些步骤已经被几个模板仓库处理好了，这些仓库列在[这里](https://uniswaphooks.com/components/hooks/templates)。
+
+## 钩子模板
+最受欢迎的模板之一是[v4-template](https://github.com/uniswapfoundation/v4-template)，它由[Sauce](https://github.com/saucepoint)创建。
+
+你可以克隆这个仓库，然后按照README中的说明开始操作。
+
+## 入门指南
+1. **安装**：模板需要Foundry。使用以下命令安装依赖：
+```shell
+forge install
+```
+2. **测试**：运行测试：
+```shell
+forge test
+```
+## 计数器钩子
+模板包含了一个示例钩子（`Counter.sol`），它的测试以及用于部署钩子的脚本。
+
+以下是关于计数器钩子的一些值得注意的事情：
+
+1. 它扩展了`BaseHook`合约，该合约在[v4-periphery](https://github.com/Uniswap/v4-periphery/blob/main/contracts/BaseHook.sol)仓库中定义。
+```solidity
+import {BaseHook} from "v4-periphery/BaseHook.sol";
+
+contract Counter is BaseHook {
+     // ... 钩子代码在这里
+}
+```
+2. 在每次交换和修改位置调用之前和之后，都会调用钩子。这是作为`getHookPermissions`函数的一部分完成的。
+
+```solidity
+function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
+    return Hooks.Permissions({
+        beforeInitialize: false,
+        afterInitialize: false,
+        beforeAddLiquidity: true,
+        afterAddLiquidity: false,
+        beforeRemoveLiquidity: true,
+        afterRemoveLiquidity: false,
+        beforeSwap: true,
+        afterSwap: true,
+        beforeDonate: false,
+        afterDonate: false,
+        noOp: false,
+        accessLock: false
+    });
+}
+```
+
+3. 对应于钩子调用，钩子实现了以下函数：
+```solidity
+function beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata)
+    external
+    override
+    returns (bytes4)
+{
+    beforeSwapCount[key.toId()]++;
+    return BaseHook.beforeSwap.selector;
+}
+
+function afterSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata)
+    external
+    override
+    returns (bytes4)
+{
+    afterSwapCount[key.toId()]++;
+    return BaseHook.afterSwap.selector;
+}
+
+function beforeAddLiquidity(
+    address,
+    PoolKey calldata key,
+    IPoolManager.ModifyLiquidityParams calldata,
+    bytes calldata
+) external override returns (bytes4) {
+    beforeAddLiquidityCount[key.toId()]++;
+    return BaseHook.beforeAddLiquidity.selector;
+}
+
+function beforeRemoveLiquidity(
+    address,
+    PoolKey calldata key,
+    IPoolManager.ModifyLiquidityParams calldata,
+    bytes calldata
+) external override returns (bytes4) {
+    beforeRemoveLiquidityCount[key.toId()]++;
+    return BaseHook.beforeRemoveLiquidity.selector;
+}
+```
+4. 在这些函数中的每一个中，计数器钩子都会递增一个计数器。你可以在`beforeSwap`函数中看到这一点：
+```solidity
+function beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata)
+    external
+    override
+    returns (bytes4)
+{
+    beforeSwapCount[key.toId()]++;
+    return BaseHook.beforeSwap.selector;
+}
+```
+
+## 进一步资源
+- [v4-periphery](https://github.com/Uniswap/v4-periphery)：用于高级钩子实现。
+- [v4-core](https://github.com/Uniswap/v4-core)：Uniswap v4的核心仓库。

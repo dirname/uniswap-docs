@@ -1,0 +1,38 @@
+{
+  "title": {
+    "message": "Uniswap 文档",
+    "description": "导航栏中的标题"
+  },
+  "item.label.Concepts": {
+    "message": "概念",
+    "description": "导航栏中的条目，标签=概念"
+  },
+  "item.label.Contracts": {
+    "message": "合约",
+    "description": "导航栏中的条目，标签=合约"
+  },
+  "item.label.SDKs": {
+    "message": "SDKs",
+    "description": "导航栏中的条目，标签=SDKs"
+  },
+  "item.label.APIs": {
+    "message": "APIs",
+    "description": "导航栏中的条目，标签=APIs"
+  },
+  "item.label.Give Feedback": {
+    "message": "提出反馈",
+    "description": "导航栏中的条目，标签=提出反馈"
+  },
+  "item.label.Whitepaper": {
+    "message": "白皮书",
+    "description": "导航栏中的条目，标签=白皮书"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "导航栏中的条目，标签=GitHub"
+  },
+  "item.label.Grants": {
+    "message": "激励",
+    "description": "导航栏中的条目，标签=激励"
+  }
+}
