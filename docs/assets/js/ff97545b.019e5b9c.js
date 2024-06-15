@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_uniswap_docs=self.webpackChunk_uniswap_docs||[]).push([[1477],{26853:e=>{e.exports=JSON.parse('{"permalink":"/uniswap-docs/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"previousPage":null,"nextPage":null,"blogDescription":"\u535a\u5ba2","blogTitle":"\u5de5\u7a0b\u535a\u5ba2"}')}}]);
